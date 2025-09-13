@@ -1,0 +1,52 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib.pagesizes import A4
+
+# ---------- Step 1: Create a sample dataset ----------
+data = {
+    "Name": ["Alice", "Bob", "Charlie", "David", "Eva"],
+    "Marks": [85, 67, 90, 76, 88],
+    "Attendance": [90, 80, 95, 85, 92]
+}
+df = pd.DataFrame(data)
+df.to_csv("sample_data.csv", index=False)  # Save sample data file
+
+# ---------- Step 2: Read the data ----------
+df = pd.read_csv("sample_data.csv")
+
+# ---------- Step 3: Analyze the data ----------
+summary = df.describe()
+
+# ---------- Step 4: Create a chart ----------
+plt.figure(figsize=(6,4))
+df["Marks"].plot(kind="bar", color="skyblue")
+plt.title("Student Marks")
+plt.xlabel("Students")
+plt.ylabel("Marks")
+plt.tight_layout()
+plt.savefig("chart.png")
+plt.close()
+
+# ---------- Step 5: Generate PDF ----------
+pdf_file = "report.pdf"
+doc = SimpleDocTemplate(pdf_file, pagesize=A4)
+styles = getSampleStyleSheet()
+story = []
+
+story.append(Paragraph("📊 Automated Report", styles['Title']))
+story.append(Spacer(1, 20))
+
+# Add summary
+story.append(Paragraph("Data Summary:", styles['Heading2']))
+story.append(Paragraph(summary.to_html(), styles['Normal']))
+story.append(Spacer(1, 20))
+
+# Add chart
+story.append(Paragraph("Data Visualization:", styles['Heading2']))
+story.append(Image("chart.png", width=400, height=250))
+
+doc.build(story)
+
+print("✅ Report generated successfully! Check 'report.pdf'")
